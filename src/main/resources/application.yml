@@ -19,3 +19,9 @@ spring:
         hbm2ddl:
           auto: none
 
+
+currency:
+  cbr:
+    url: ${CBR_XML_URL:https://cbr.ru/scripts/XML_daily.asp}
+    sync-enabled: ${CBR_SYNC_ENABLED:true}
+    interval-ms: 3600000

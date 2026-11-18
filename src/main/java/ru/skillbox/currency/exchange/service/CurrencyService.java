@@ -3,7 +3,9 @@ package ru.skillbox.currency.exchange.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import ru.skillbox.currency.exchange.dto.CurrencyDto;
 import ru.skillbox.currency.exchange.dto.CurrencyListDto;
 import ru.skillbox.currency.exchange.dto.CurrencyShortDto;
@@ -27,14 +29,17 @@ public class CurrencyService {
   public CurrencyDto getById(Long id) {
     log.info("CurrencyService method getById executed");
     Currency currency = repository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Currency not found with id: " + id));
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "Currency not found with id: " + id));
     return mapper.convertToDto(currency);
   }
 
   public Double convertValue(Long value, Long numCode) {
     log.info("CurrencyService method convertValue executed");
-    Currency currency = repository.findByIsoNumCode(numCode);
-    return value * currency.getValue();
+    Currency currency = repository.findFirstByIsoNumCodeOrderByIsoCharCodeAscIdAsc(numCode)
+        .orElseThrow(() -> new ResponseStatusException(
+            HttpStatus.NOT_FOUND, "Currency not found with numeric ISO code: " + numCode));
+    return value * currency.getValue() / currency.getNominal();
   }
 
   public CurrencyDto create(CurrencyDto dto) {
