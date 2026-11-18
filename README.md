@@ -1,70 +1,51 @@
-# Сервис Обмен валюты
-Приложение для практического кейса "Обмен Валюты" обучающей платформы [Skillbox](https://skillbox.ru)
+# Сервис обмена валюты
 
-## Используемые технологии
+Доработка [стартового проекта Skillbox](https://github.com/skillbox-java/p3_currency_exchange).
+Приложение работает на Java 17, Spring Boot, PostgreSQL и Liquibase. Курсы загружаются в XML
+с помощью JAXB.
 
-- Spring Boot 2.7
-- Maven 3
-- Lombok
-- Mapstruct
-- Liquibase
-- PostgreSQL
+## Запуск
 
-## Требования
-
-### JDK 17
-
-Проект использует синтаксис Java 17. Для локального запуска вам потребуется
-установленный JDK 17.
-
-### Docker
-Для запуска проекта вам потребуется установленный и запущенный Docker.
-Для запуска БД(PostgreSQL) требется запустить соответствующий сервис в Docker.
-
-### Подключение к интернету
-
-Подключение к интернету для получения курсов валют
-
-## Полезные команды
-
-### Запуск контейнера с базой данных
+Подготовьте JDK 17 и PostgreSQL. Например, базу для локальной разработки можно запустить в Docker:
 
 ```bash
-docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=postgres -d postgres
+docker run -d --name currency-postgres -p 5432:5432 -e POSTGRES_PASSWORD=postgres postgres:16
+./mvnw clean verify
+./mvnw spring-boot:run
 ```
 
-Пользователь для подключения к контейнеру `postgres`.
+На Windows используйте `mvnw.cmd` вместо `./mvnw`. Если Maven уже установлен, подойдёт
+`mvn clean verify`. На этапе `verify` выполняется Checkstyle.
 
-### IntelliJ IDEA
+| Переменная | Значение по умолчанию |
+| --- | --- |
+| `DB_URL` | `jdbc:postgresql://localhost:5432/postgres` |
+| `DB_USERNAME` | `postgres` |
+| `DB_PASSWORD` | `postgres` |
+| `CBR_XML_URL` | `https://cbr.ru/scripts/XML_daily.asp` |
+| `CBR_SYNC_ENABLED` | `true` |
 
-Запустите main метод класса Application
-
-### Запросы API
-
-Создание новой записи о валюте
+## API
 
 ```bash
-curl --request POST \
-  --url http://localhost:8080/api/currency/create \
-  --header 'Content-Type: application/json' \
-  --data '{
-  "name": "Доллар Готэм-Сити",
-  "nominal": 3,
-  "value": 32.2,
-  "isoNumCode": 1337
-}'
+curl http://localhost:8080/api/currency/
+curl http://localhost:8080/api/currency/1333
+curl 'http://localhost:8080/api/currency/convert?value=100&numCode=840'
 ```
 
-Получение Валюты по id
+Список возвращает объект `{"currencies":[{"name":"Доллар США","value":93.5224}]}`.
+Число в примере взято из стартовой базы. Поле `value` содержит стоимость в рублях
+за указанный в записи номинал. При конвертации сервис приводит курс к одной
+единице валюты. Если в базе есть более свежая запись с буквенным кодом,
+конвертация использует её.
 
-```bash
-curl --request GET \
-  --url http://localhost:8080/api/currency/1333
-```
+По ID возвращается подробная запись с полем `isoCharCode`. У исходных записей оно
+имеет значение `null`. Остаётся доступен и существующий `POST /api/currency/create`.
 
-Конвертация валюты по числовому коду
+## Обновление валют
 
-```bash
-curl --request GET \
---url http://localhost:8080/api/currency/convert?value=100&numCode=840
-```
+Миграция добавляет nullable-колонку `iso_char_code` с уникальным ограничением.
+Исходные записи сохраняются. При запуске и затем каждый час сервис загружает
+XML ЦБ, обновляет записи по буквенному коду и создаёт недостающие. Каждая загрузка
+применяется одной транзакцией. В журнале есть результат и количество обработанных
+валют. При ошибке загрузки прежние данные остаются доступны.
