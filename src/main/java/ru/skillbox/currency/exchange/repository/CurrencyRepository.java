@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import ru.skillbox.currency.exchange.entity.Currency;
 
+/** Persistence operations for currency records. */
 public interface CurrencyRepository extends JpaRepository<Currency, Long> {
 
   Optional<Currency> findFirstByIsoNumCodeOrderByIsoCharCodeAscIdAsc(Long isoNumCode);

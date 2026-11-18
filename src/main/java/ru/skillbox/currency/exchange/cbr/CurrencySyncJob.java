@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 import org.xml.sax.SAXException;
 import ru.skillbox.currency.exchange.service.CurrencySyncService;
 
+/** Refreshes currency rates from the configured CBR feed. */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ public class CurrencySyncJob {
   private final CurrencyLoader loader;
   private final CurrencySyncService service;
 
+  /** Fetches the current feed and applies it to the currency table. */
   @Scheduled(fixedRateString = "${currency.cbr.interval-ms}")
   public void refresh() {
     try {

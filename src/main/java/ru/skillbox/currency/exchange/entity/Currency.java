@@ -11,6 +11,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/** A currency rate stored in the exchange database. */
 @Setter
 @Getter
 @Entity

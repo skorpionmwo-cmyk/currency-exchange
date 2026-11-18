@@ -13,6 +13,7 @@ import ru.skillbox.currency.exchange.dto.CurrencyDto;
 import ru.skillbox.currency.exchange.dto.CurrencyListDto;
 import ru.skillbox.currency.exchange.service.CurrencyService;
 
+/** HTTP endpoints for viewing, creating, and converting currencies. */
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/currency")

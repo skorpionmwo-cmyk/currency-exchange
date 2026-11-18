@@ -11,12 +11,14 @@ import ru.skillbox.currency.exchange.cbr.CbrQuote;
 import ru.skillbox.currency.exchange.entity.Currency;
 import ru.skillbox.currency.exchange.repository.CurrencyRepository;
 
+/** Imports a complete batch of CBR quotes in a single transaction. */
 @Service
 @RequiredArgsConstructor
 public class CurrencySyncService {
 
   private final CurrencyRepository repository;
 
+  /** Updates matching alphabetic ISO codes and inserts any missing quotes. */
   @Transactional
   public int update(List<CbrQuote> quotes) {
     Map<String, CbrQuote> byCode = quotes.stream()

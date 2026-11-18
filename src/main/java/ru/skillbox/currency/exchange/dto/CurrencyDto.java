@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+/** Detailed representation of a single currency rate. */
 @Getter
 @Setter
 @NoArgsConstructor

@@ -16,6 +16,7 @@ import org.springframework.stereotype.Component;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
+/** Downloads the CBR feed and reads it through JAXB. */
 @Component
 public class CurrencyLoader {
   private static final int TIMEOUT_MS = (int) Duration.ofSeconds(15).toMillis();
@@ -28,6 +29,7 @@ public class CurrencyLoader {
     this.context = JAXBContext.newInstance(CbrRates.class);
   }
 
+  /** Downloads all quotes, honoring the encoding declared in the XML. */
   public List<CbrQuote> load()
       throws IOException, JAXBException, ParserConfigurationException, SAXException {
     var connection = source.toURL().openConnection();
